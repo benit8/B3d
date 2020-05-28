@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
-buildDir='build'
+if [ ! -d extern ]; then
+	mkdir extern
+	ln -s ../../ extern/B3d
+fi
 
+buildDir='build'
 if [ ! -d "$buildDir" ]; then
 	mkdir "$buildDir"
 fi

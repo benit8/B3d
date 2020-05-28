@@ -2,7 +2,6 @@
 set -e
 
 buildDir='build'
-
 if [ ! -d "$buildDir" ]; then
 	mkdir "$buildDir"
 fi

@@ -12,7 +12,7 @@ add_subdirectory(extern/B3d)
 
 target_compile_features(test
 PRIVATE
-	cxx_std_17
+	cxx_std_20
 )
 
 target_compile_options(test
