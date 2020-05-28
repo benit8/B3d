@@ -1,0 +1,3 @@
+[submodule "extern/B"]
+	path = extern/B
+	url = git@github.com:benit8/B.git

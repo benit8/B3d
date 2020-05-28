@@ -1,0 +1,45 @@
+/*
+** B, 2019
+** Rendering / Vertex.hpp
+*/
+
+#pragma once
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace B {
+	struct Vertex;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#include "B/Math/Vector3.hpp"
+#include "B/Color.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace B
+{
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct Vertex
+{
+	Vector3 pos;
+	Color color;
+	Vector3 tex;
+	Vector3 norm;
+
+	Vertex();
+	Vertex(const Vector3 &p);
+	Vertex(const Vector3 &p, const Color &c);
+	Vertex(const Vector3 &p, const Color &c, const Vector3 &t);
+	Vertex(const Vector3 &p, const Color &c, const Vector3 &t, const Vector3 &n);
+	Vertex(const Vertex &) = default;
+	Vertex(Vertex &&) = default;
+	Vertex &operator =(const Vertex &) = default;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}

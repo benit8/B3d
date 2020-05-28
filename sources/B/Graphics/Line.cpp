@@ -1,0 +1,34 @@
+/*
+** B, 2019
+** Graphics / Line.cpp
+*/
+
+#include "B/Graphics/Line.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace B
+{
+
+////////////////////////////////////////////////////////////////////////////////
+
+Line::Line(const Position &s, const Position &e)
+: start(s)
+, end(e)
+{}
+
+Line::Line(const Position &s, const Position &e, const Color &c)
+: start(s)
+, end(e)
+, color(c)
+{}
+
+
+void Line::draw(Renderer &renderer) const
+{
+	renderer.trace(start, end, color);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
