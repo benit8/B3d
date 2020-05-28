@@ -18,35 +18,30 @@ int main()
 	SimpleApplication app;
 	bool paused = false;
 
-	app.onCreate.add([&]() {
-		auto win = app.createWindow(Size(1280, 720), "Hello World");
+	app.onCreate.add([&] {
+		auto win = app.createWindow({1280, 720}, "Hello World");
 		app.createRenderer(*win);
 
-		win->onClose.add([&] () {
+		win->onClose.add([&] {
 			app.close();
 		});
 
-		/*
-		win->onKeyDown.filter(
-			std::bind(&SimpleApplication::close, app),
-			[](const KeyEvent &e) {
-				return e.noMods() && e.key == "escape";
-			}
-		);
+		win->onKeyDown.add([&app] (const KeyEvent &e) {
+			if (e.key == "escape")
+				app.close();
+		});
 
-		win->onKeyDown.filter(
-			[&paused] { paused = !paused; },
-			[] (const KeyEvent &e) {
-				return e.key == "space";
-			}
-		);
-		*/
+		win->onKeyDown.add([&paused] (const KeyEvent &e) {
+			if (e.key == "space")
+				paused = !paused;
+		});
+
 	});
 
 	Mesh mesh;
 	app.onCreate.add([&] {
 		if (!mesh.loadFromFile("../assets/ship.obj")) {
-			LogFatal("Failed to load mesh");
+			Logger::fatal("Failed to load mesh");
 		}
 
 		mesh.translate({0, 0, 8});
@@ -62,7 +57,7 @@ int main()
 		renderer->render(mesh);
 	});
 
-	app.onDestroy.add([&] () {
+	app.onDestroy.add([&] {
 		app.window()->close();
 	});
 
