@@ -41,18 +41,18 @@ Color::Color(u8 red, u8 green, u8 blue, u8 alpha)
 , a(alpha)
 {}
 
+////////////////////////////////////////////////////////////////////////////////
 
 u32 Color::toInt() const
 {
 	return a << 24 | r << 16 | g << 8 | b;
 }
 
-Color &Color::inverse()
+void Color::inverse()
 {
 	this->r = 255 - this->r;
 	this->g = 255 - this->g;
 	this->b = 255 - this->b;
-	return *this;
 }
 
 Color Color::inversed() const
@@ -132,11 +132,11 @@ Color Color::HSB(u16 hue, u8 sat, u8 bri, u8 a)
 	};
 
 	switch (sector) {
-		case 1 : return Color(tints[1], b, tints[0], a);
-		case 2 : return Color(tints[0], b, tints[2], a);
-		case 3 : return Color(tints[0], tints[1], b, a);
-		case 4 : return Color(tints[2], tints[0], b, a);
-		case 5 : return Color(b, tints[0], tints[1], a);
+		case  1: return Color(tints[1], b, tints[0], a);
+		case  2: return Color(tints[0], b, tints[2], a);
+		case  3: return Color(tints[0], tints[1], b, a);
+		case  4: return Color(tints[2], tints[0], b, a);
+		case  5: return Color(b, tints[0], tints[1], a);
 		default: return Color(b, tints[2], tints[0], a);
 	}
 }

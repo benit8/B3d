@@ -7,6 +7,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <utility>
+
+////////////////////////////////////////////////////////////////////////////////
+
 namespace B
 {
 
@@ -43,28 +47,32 @@ using Pos = Position;
 class Positionable
 {
 public:
-	Positionable()
-	{}
+	Positionable() = default;
+	virtual ~Positionable() = default;
 
-	Positionable(int x, int y)
-	: m_position(x, y)
+	Positionable(Position &&position)
+	: m_position(std::move(position))
 	{}
 
 	Positionable(const Position &position)
 	: m_position(position)
 	{}
 
-	virtual const Position &position() const { return m_position; }
+	Positionable(int x, int y)
+	: m_position(x, y)
+	{}
+
 	int x() const { return position().x; }
 	int y() const { return position().y; }
+	virtual const Position &position() const { return m_position; }
 
-	virtual void setPosition(const Position &pos) { m_position = pos; }
-	void setPosition(int x, int y) { setPosition(Position(x, y)); }
 	void setX(int x) { setPosition(x, y()); }
 	void setY(int y) { setPosition(x(), y); }
+	void setPosition(int x, int y) { setPosition(Position(x, y)); }
+	virtual void setPosition(const Position &pos) { m_position = pos; }
 
-	void move(const Position &pos) { setPosition(m_position + pos); }
 	void move(int x, int y) { move(Position(x, y)); }
+	void move(const Position &pos) { setPosition(m_position + pos); }
 
 protected:
 	Position m_position;

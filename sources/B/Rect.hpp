@@ -26,10 +26,8 @@ namespace B
 class Rect : public Positionable, public Sizeable
 {
 public:
-	Rect()
-	: Positionable(0, 0)
-	, Sizeable(0, 0)
-	{}
+	Rect() = default;
+	virtual ~Rect() = default;
 
 	Rect(Rect &&rect)
 	: Positionable(std::move(rect.position()))

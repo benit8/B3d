@@ -32,8 +32,11 @@ struct Color
 	Color(u32 color);
 	Color(u8 red, u8 green, u8 blue, u8 alpha = 255);
 
+	///              [0-360]  [0-100]        [0-100]        [0-255]
+	static Color HSB(u16 hue, u8 saturation, u8 brightness, u8 alpha = 255);
+
 	u32 toInt() const;
-	Color &inverse();
+	void inverse();
 	Color inversed() const;
 	Color interpolate(const Color &other, f64 factor = 0.5f) const;
 	Vector<Color> getAllInterpolates(const Color &other, unsigned steps) const;
@@ -41,9 +44,6 @@ struct Color
 	operator u32() const { return toInt(); }
 	bool operator ==(const Color &rhs) const;
 	bool operator !=(const Color &rhs) const;
-
-	///              [0-360]  [0-100]        [0-100]        [0-255]
-	static Color HSB(u16 hue, u8 saturation, u8 brightness, u8 alpha = 255);
 
 	static const Color Transparent;
 	static const Color Black;

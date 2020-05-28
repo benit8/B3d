@@ -7,8 +7,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <utility>
+
+////////////////////////////////////////////////////////////////////////////////
+
 namespace B
 {
+
+////////////////////////////////////////////////////////////////////////////////
 
 struct Size
 {
@@ -40,32 +46,40 @@ struct Size
 class Sizeable
 {
 public:
-	Sizeable()
-	{}
+	Sizeable() = default;
+	virtual ~Sizeable() = default;
 
-	Sizeable(unsigned w, unsigned h)
-	: m_size(w, h)
+	Sizeable(Size &&size)
+	: m_size(std::move(size))
 	{}
 
 	Sizeable(const Size &size)
 	: m_size(size)
 	{}
 
-	virtual const Size &size() const { return m_size; }
-	virtual void setSize(const Size &size) { m_size = size; }
-	virtual void grow(const Size &size) { setSize(m_size + size); }
-	virtual void shrink(const Size &size) { setSize(m_size - size); }
+	Sizeable(unsigned w, unsigned h)
+	: m_size(w, h)
+	{}
 
 	unsigned width() const { return size().width; }
 	unsigned height() const { return size().height; }
-	void setSize(unsigned width, unsigned height) { setSize({width, height}); }
+	virtual const Size &size() const { return m_size; }
+
 	void setWidth(unsigned w) { setSize(w, height()); }
 	void setHeight(unsigned h) { setSize(width(), h); }
+	void setSize(unsigned width, unsigned height) { setSize({width, height}); }
+	virtual void setSize(const Size &size) { m_size = size; }
+
 	void grow(unsigned width, unsigned height) { grow({width, height}); }
+	virtual void grow(const Size &size) { setSize(m_size + size); }
+
 	void shrink(unsigned width, unsigned height) { shrink({width, height}); }
+	virtual void shrink(const Size &size) { setSize(m_size - size); }
 
 protected:
 	Size m_size;
 };
+
+////////////////////////////////////////////////////////////////////////////////
 
 }
