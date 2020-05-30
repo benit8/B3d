@@ -3,17 +3,15 @@
 ** Rendering / MeshLoader.cpp
 */
 
+#include "B/Rendering/MeshLoader.hpp"
+#include "B/String.hpp"
 #include "B/StringView.hpp"
 #include "B/Containers/Map.hpp"
-// #include "B/FileSystem/File.hpp"
-#include "B/IO/Print.hpp"
-#include "B/Rendering/MeshLoader.hpp"
 #include "B/Utils/Logger.hpp"
 
 #include <cctype>
 #include <functional>
 #include <unordered_map>
-#include <string>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,88 +31,84 @@ MeshLoader::MeshLoader(const String &filename)
 
 bool MeshLoader::loadToMesh(Mesh &mesh)
 {
-	static std::unordered_map<std::string, std::function<bool(std::istringstream &)>> lineTypes = {
-		{"v",  std::bind(&MeshLoader::parseVertex, this, _1)},
-		{"vt", std::bind(&MeshLoader::parseTexture, this, _1)},
-		{"vn", std::bind(&MeshLoader::parseNormal, this, _1)},
-		{"f",  std::bind(&MeshLoader::parseFace, this, _1)}
-	};
-
-
-	std::ifstream file(m_filename.cStr());
-	if (!file.is_open()) {
-		Logger::error("Failed to open mesh file '%$': %m\n", m_filename);
-		return false;
-	}
+	auto reader = Reader::fromFile(m_filename);
+	// if (!file.is_open()) {
+	// 	Logger::error("Failed to open mesh file '%$': %m\n", m_filename);
+	// 	return false;
+	// }
 
 	bool hasError = false;
-	std::string line;
-	while (!hasError && std::getline(file, line)) {
+	String line;
+	while (!hasError && reader.readLine(line)) {
+		cleanLine(line);
 		if (line.empty())
 			continue;
 
-		cleanLine(line);
+		Logger::debug("%$", line);
 
 		// Extract the line type (v, f, ...) and search for a parser bound to it
-		std::istringstream stream(line);
-		std::string type;
-		stream >> type;
+		auto lineReader = Reader::fromString(line);
+		String type;
+		lineReader >> type;
 
-		auto it = lineTypes.find(type);
-		if (it != lineTypes.end()) {
-			if (!it->second(stream)) {
-				hasError = true;
-				break;
-			}
+		bool ok = false;
+		/**/ if (type == "v")  ok = parseVertex(lineReader);
+		else if (type == "vt") ok = parseTexture(lineReader);
+		else if (type == "vn") ok = parseNormal(lineReader);
+		else if (type == "f")  ok = parseFace(lineReader);
+		else {
+			Logger::warn("Un-parsed line type '%$'", type);
+			continue;
+		}
+
+		if (!ok) {
+			hasError = true;
+			break;
 		}
 	}
-
-	file.close();
 
 	return hasError ? false : buildFaces(mesh);
 }
 
 
-void MeshLoader::cleanLine(std::string &s)
+void MeshLoader::cleanLine(String &s)
 {
 	// Search for a comment and erase from it to end of the line
-	usize p = s.find_first_of("#");
-	if (p != std::string::npos)
+	usize p = s.findOf("#");
+	if (p != String::nPos)
 		s.erase(p);
 
-	// s.trim();
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) { return !std::isspace(ch); }));
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) { return !std::isspace(ch); }).base(), s.end());
+	s.trim();
 }
 
-bool MeshLoader::parseVertex(std::istringstream &stream)
+bool MeshLoader::parseVertex(Reader &reader)
 {
 	Vector3 v;
-	stream >> v.x >> v.y >> v.z;
+	reader >> v.x >> v.y >> v.z;
 
 	m_buffer.vertices.append(v);
 	return true;
 }
 
-bool MeshLoader::parseTexture(std::istringstream &stream)
+bool MeshLoader::parseTexture(Reader &reader)
 {
 	Vector3 t;
-	stream >> t.x >> t.y >> t.z;
+	reader >> t.x >> t.y >> t.z;
 
 	m_buffer.textures.append(t);
 	return true;
 }
 
-bool MeshLoader::parseNormal(std::istringstream &stream)
+bool MeshLoader::parseNormal(Reader &reader)
 {
 	Vector3 n;
-	stream >> n.x >> n.y >> n.z;
+	reader >> n.x >> n.y >> n.z;
 
 	m_buffer.normals.append(n);
 	return true;
 }
 
-bool MeshLoader::parseFace(std::istringstream &stream)
+bool MeshLoader::parseFace(Reader &reader)
 {
 	Face face;
 
@@ -122,31 +116,31 @@ bool MeshLoader::parseFace(std::istringstream &stream)
 		Face::Indexes indexes = {0};
 
 		/// Geometric vertex index
-		stream >> indexes[0];
-		if (stream.peek() != '/')
+		reader >> indexes[0];
+		Logger::debug("%$", indexes[0]);
+		if (!reader.peek('/'))
 			goto cont;
-		stream.ignore(1, '/');
+		reader.ignore();
 
 		// Vertex texture index ?
-		if (stream.peek() != '/') {
-			stream >> indexes[1];
+		if (!reader.peek('/')) {
+			reader >> indexes[1];
 		}
 		else {
-			stream.ignore(1, '/');
-			stream >> indexes[2];
+			reader.ignore();
+			reader >> indexes[2];
 			goto cont;
 		}
 
 		// Vertex normal index ?
-		if (stream.peek() == '/') {
-			stream.ignore(1, '/');
-			stream >> indexes[2];
+		if (reader.peek('/')) {
+			reader.ignore();
+			reader >> indexes[2];
 		}
 
 cont:
 		face.indexes.append(indexes);
-		stream.ignore(1L << 12, ' ');
-	} while (stream);
+	} while (!reader.eof());
 
 	m_buffer.faces.append(face);
 	return true;
@@ -168,7 +162,7 @@ bool MeshLoader::buildFaces(Mesh &mesh)
 
 			if (iv < 0)
 				iv += m_buffer.vertices.size() + 1;
-			if (iv > (int)m_buffer.vertices.size()) {
+			if ((usize)iv > m_buffer.vertices.size()) {
 				eprint("%$: Invalid vertex normal index: %$\n", m_filename, iv);
 				break;
 			}
@@ -178,7 +172,7 @@ bool MeshLoader::buildFaces(Mesh &mesh)
 
 			if (ivt < 0)
 				ivt += m_buffer.textures.size() + 1;
-			if (ivt > (int)m_buffer.textures.size()) {
+			if ((usize)ivt > m_buffer.textures.size()) {
 				eprint("%$: Invalid vertex normal index: %$\n", m_filename, ivt);
 				break;
 			}
@@ -188,7 +182,7 @@ bool MeshLoader::buildFaces(Mesh &mesh)
 
 			if (ivn < 0)
 				ivn += m_buffer.normals.size() + 1;
-			if (ivn > (int)m_buffer.normals.size()) {
+			if ((usize)ivn > m_buffer.normals.size()) {
 				eprint("%$: Invalid vertex normal index: %$\n", m_filename, ivn);
 				break;
 			}

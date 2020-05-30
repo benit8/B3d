@@ -16,12 +16,9 @@ namespace B {
 #include "B/String.hpp"
 #include "B/Containers/Array.hpp"
 #include "B/Containers/Vector.hpp"
-// #include "B/IO/Reader.hpp"
+#include "B/IO/Reader.hpp"
 #include "B/Rendering/Mesh.hpp"
 #include "B/Math/Vector3.hpp"
-
-#include <fstream>
-#include <sstream>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +32,7 @@ class MeshLoader
 private:
 	struct Face
 	{
-		typedef Array<i64,3> Indexes;
+		typedef Array<i64, 3> Indexes;
 		Vector<Indexes> indexes;
 	};
 
@@ -51,15 +48,15 @@ public:
 	MeshLoader(const String &filename);
 	~MeshLoader() = default;
 
-	bool loadToMesh(Mesh &mesh);
+	bool loadToMesh(Mesh &);
 
 private:
-	void cleanLine(std::string &line);
-	bool parseVertex(std::istringstream &stream);
-	bool parseTexture(std::istringstream &stream);
-	bool parseNormal(std::istringstream &stream);
-	bool parseFace(std::istringstream &stream);
-	bool buildFaces(Mesh &mesh);
+	void cleanLine(String &line);
+	bool parseVertex(Reader &);
+	bool parseTexture(Reader &);
+	bool parseNormal(Reader &);
+	bool parseFace(Reader &);
+	bool buildFaces(Mesh &);
 
 private:
 	String m_filename;
