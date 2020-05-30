@@ -28,11 +28,11 @@ namespace B
 class Vector3
 {
 public:
-	Vector3();
-	Vector3(f64 n);
+	Vector3() = default;
+	explicit Vector3(f64 n);
 	Vector3(f64 x, f64 y, f64 z);
 	Vector3(const Vector3 &other);
-	Vector3(const Vector2 &other);
+	explicit Vector3(const Vector2 &other);
 	~Vector3() = default;
 
 	f64 length() const;
@@ -67,11 +67,13 @@ public:
 	bool operator ==(const Vector3 &rhs) const;
 	bool operator !=(const Vector3 &rhs) const;
 
-	operator Vector2() const;
-	operator Position() const;
+	explicit operator Vector2() const;
+	explicit operator Position() const;
 
 public:
-	f64 x, y, z;
+	f64 x = 0;
+	f64 y = 0;
+	f64 z = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

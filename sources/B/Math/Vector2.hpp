@@ -27,12 +27,12 @@ namespace B
 class Vector2
 {
 public:
-	Vector2();
-	Vector2(f64 n);
+	Vector2() = default;
+	explicit Vector2(f64 n);
 	Vector2(f64 x, f64 y);
 	Vector2(const Position &other);
 	Vector2(const Vector2 &other);
-	Vector2(const Vector3 &other);
+	explicit Vector2(const Vector3 &other);
 	~Vector2() = default;
 
 	f64 length() const;
@@ -65,11 +65,12 @@ public:
 	bool operator ==(const Vector2 &rhs) const;
 	bool operator !=(const Vector2 &rhs) const;
 
-	operator Vector3() const;
+	explicit operator Vector3() const;
 	operator Position() const;
 
 public:
-	f64 x, y;
+	f64 x = 0;
+	f64 y = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -77,7 +77,7 @@ void Renderer::trace(const Position &start, const Position &end, const Color &co
 void Renderer::trace(const Vertex &start, const Vertex &end)
 {
 	if (start.color == end.color) {
-		trace(start.pos, end.pos, start.color);
+		trace((Position)start.pos, (Position)end.pos, start.color);
 		return;
 	}
 
